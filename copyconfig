@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+# rsync script to copy my dotfiles around... 
+
+config=$HOME/.config
+target=$HOME/Projects/dotfiles/.config
+
+rsync -aP \
+  --exclude ".idea" \
+  --exclude "ranger_devicons" \
+  $config/i3 \
+  $config/dunst \
+  $config/alacritty \
+  $config/kitty \
+  $config/nvim \
+  $config/ranger \
+  $config/rofi \
+  $config/starship.toml \
+  $config/polybar \
+  $config/neofetch \
+  $target
+
