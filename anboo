@@ -1,0 +1,139 @@
+#!/usr/bin/env node
+
+/**
+ * NodeJs script to create a systemd boot entry by copying an existing entry
+ * and writing a new entry with the optimus-manager startup option set to nvidia.
+ * 
+ * @author https://github.com/cribac
+ * @version 0.1.2
+ */
+const FS = require('fs/promises')
+
+// the entries of systemd boot 
+const BOOT_ENTRIES_PATH = '/efi/loader/entries'
+// the end part of the file we want to copy
+const FILE_ENDING = 'arch1-1.conf'
+// the end part of the file we want to create
+const FILE_COPY_ENDING = 'performance.conf'
+// the existing keys of a systemd boot entry file
+const KEYS = [
+  'title',
+  'version',
+  'machine-id',
+  'sort-key',
+  'options',
+  'linux',
+  'initrd'
+]
+
+/**
+ * @param {String} ending 
+ */
+async function findFile(ending) {
+  try {
+    const files = await FS.readdir(BOOT_ENTRIES_PATH)
+    return files.find((f) => f.endsWith(ending))
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+/**
+ * @param {import('fs').PathLike} file 
+ */
+async function readFile(file) {
+  try {
+    const data = await FS.readFile(`${BOOT_ENTRIES_PATH}/${file}`, { encoding: 'utf-8' })
+    return data
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+/**
+ * @param {Object} options 
+ */
+async function createOutputFile(options) {
+  try {
+    for (let [key, value] of Object.entries(options)) {
+      await FS.appendFile(`${BOOT_ENTRIES_PATH}/${fileCopyName()}`, `${key} ${value}\n`)
+    }
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+/**
+ * @returns String ex: "2-18-2023"
+ */
+function buildDateString() {
+  const d = new Date()
+  return `${d.toLocaleDateString().replace(/\//g, '-')}`
+}
+
+/**
+ * @returns String
+ */
+function fileCopyName() {
+  return `${buildDateString()}-${FILE_COPY_ENDING}`
+}
+
+/**
+ * @param {Array<String>} lines 
+ * @returns {Array<String>}
+ */
+function getSanitizedLines(lines) {
+  const filteredLines = lines.filter(Boolean)
+  const sanitizedLines = []
+  filteredLines.forEach((line, idx) => {
+    if (line.includes(KEYS[idx])) {
+      const sanitizedLine = line.replace(KEYS[idx], '')
+      sanitizedLines.push(sanitizedLine.trim())
+    }
+  })
+  return sanitizedLines
+}
+
+/**
+ * @param {Array<String>} sanitizedLines 
+ * @returns Object
+ */
+function buildOutputOptions(sanitizedLines) {
+  const output = {}
+  KEYS.forEach((key, idx) => {
+    output[key] = `${sanitizedLines[idx]}`
+    if (key === 'title') {
+      output['title'] = `${sanitizedLines[0]} (${sanitizedLines[1]} ${buildDateString()} Nvidia)`
+    }
+    if (key === 'options') {
+      output['options'] = `${sanitizedLines[4]} optimus-manager.startup=nvidia`
+    }
+  })
+  return output
+}
+
+function isCurrentUserRoot() {
+  return process.getuid() === 0 // UID 0 is always root
+}
+
+async function main() {
+  if (isCurrentUserRoot()) {
+    console.log('Creating new boot entry')
+    const originalFile = await findFile(FILE_ENDING)
+    const originalFileContent = await readFile(originalFile)
+    const originalLines = originalFileContent.split(/\r?\n/)
+    const sanitizedLines = getSanitizedLines(originalLines)
+    const newOptions = buildOutputOptions(sanitizedLines)
+
+    try {
+      await createOutputFile(newOptions)
+      console.log('...done!')
+    } catch (err) {
+      console.error(err)
+    }
+  } else {
+    console.log('Script must me run as root user!')
+  }
+}
+
+main()
