@@ -5,7 +5,7 @@
  * and writing a new entry with the optimus-manager startup option set to nvidia.
  * 
  * @author https://github.com/cribac
- * @version 0.1.2
+ * @version 0.2.0
  */
 const FS = require('fs/promises')
 
@@ -26,6 +26,21 @@ const KEYS = [
   'initrd'
 ]
 
+async function deleteOldEntry() {
+  try {
+    const fileToDelete = await findFile(FILE_COPY_ENDING)
+    if (fileToDelete) {
+      console.log(`Deleting old entry: ${fileToDelete}\n`)
+      await FS.rm(`${BOOT_ENTRIES_PATH}/${fileToDelete}`)
+    } else {
+      console.log('Nothing to delete!\n')
+    }
+    console.log('...done!\n')
+  } catch (err) {
+    logAndDie(err)
+  }
+}
+
 /**
  * @param {String} ending 
  */
@@ -34,7 +49,7 @@ async function findFile(ending) {
     const files = await FS.readdir(BOOT_ENTRIES_PATH)
     return files.find((f) => f.endsWith(ending))
   } catch (err) {
-    console.error(err)
+    logAndDie(err)
   }
 }
 
@@ -46,7 +61,7 @@ async function readFile(file) {
     const data = await FS.readFile(`${BOOT_ENTRIES_PATH}/${file}`, { encoding: 'utf-8' })
     return data
   } catch (err) {
-    console.error(err)
+    logAndDie(err)
   }
 }
 
@@ -59,7 +74,7 @@ async function createOutputFile(options) {
       await FS.appendFile(`${BOOT_ENTRIES_PATH}/${fileCopyName()}`, `${key} ${value}\n`)
     }
   } catch (err) {
-    console.error(err)
+    logAndDie(err)
   }
 }
 
@@ -116,9 +131,16 @@ function isCurrentUserRoot() {
   return process.getuid() === 0 // UID 0 is always root
 }
 
+function logAndDie (error) {
+  console.error(error)
+  process.exit(1)
+} 
+
 async function main() {
   if (isCurrentUserRoot()) {
-    console.log('Creating new boot entry')
+
+    await deleteOldEntry()
+
     const originalFile = await findFile(FILE_ENDING)
     const originalFileContent = await readFile(originalFile)
     const originalLines = originalFileContent.split(/\r?\n/)
@@ -126,13 +148,15 @@ async function main() {
     const newOptions = buildOutputOptions(sanitizedLines)
 
     try {
+      console.log('Creating a new boot entry\n')
       await createOutputFile(newOptions)
-      console.log('...done!')
+      console.log('...done!\n')
     } catch (err) {
-      console.error(err)
+      logAndDie(err)
     }
   } else {
-    console.log('Script must me run as root user!')
+    console.log('Script must me run as root user!\n')
+    process.exit(1)
   }
 }
 
