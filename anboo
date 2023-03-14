@@ -5,14 +5,14 @@
  * and writing a new entry with the optimus-manager startup option set to nvidia.
  * 
  * @author https://github.com/cribac
- * @version 0.2.1
+ * @version 0.2.2
  */
 const FS = require('fs/promises')
 
 // the entries of systemd boot 
 const BOOT_ENTRIES_PATH = '/efi/loader/entries'
 // the end part of the file we want to copy
-const FILE_ENDING = 'arch2-1.conf'
+const FILE_ENDING = 'arch1-1.conf'
 // the end part of the file we want to create
 const FILE_COPY_ENDING = 'performance.conf'
 // the existing keys of a systemd boot entry file
