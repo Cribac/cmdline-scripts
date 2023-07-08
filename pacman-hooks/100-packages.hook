@@ -5,6 +5,7 @@ Type = Package
 Target = *
 
 [Action]
+Description = Writing package list to /etc/pkglist.txt
 When = PostTransaction
 Exec = /bin/sh -c '/usr/bin/pacman -Qqe > /etc/pkglist.txt'
 
