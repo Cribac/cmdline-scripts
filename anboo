@@ -5,7 +5,7 @@
  * and writing a new entry with the optimus-manager startup option set to nvidia.
  * 
  * @author https://github.com/cribac
- * @version 0.2.6
+ * @version 0.2.8
  */
 const FS = require('fs/promises')
 
