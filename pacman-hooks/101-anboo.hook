@@ -1,0 +1,11 @@
+[Trigger]
+Operation = Install
+Operation = Remove
+Type = Package
+Target = *
+
+[Action]
+Description = Running anboo script ...
+When = PostTransaction
+Exec = /usr/bin/anboo
+

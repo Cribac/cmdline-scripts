@@ -6,4 +6,5 @@ Put in `/usr/share/libalpm/hooks/`
 
 - 00-informant.hook -- Checks Arch news befor installing
 - 100-packages.hook -- Keep an up-to-date list of explicitly installed packages
+- 101-anboo.hook -- Runs custom anboo script
 
