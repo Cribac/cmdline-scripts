@@ -5,7 +5,7 @@
  * and writing a new entry with the optimus-manager startup option set to nvidia.
  * 
  * @author https://github.com/cribac
- * @version 0.3.0
+ * @version 0.4.0
  */
 const FS = require('fs/promises')
 
@@ -28,7 +28,7 @@ const KEYS = [
 
 async function deleteOldEntry() {
   try {
-    const fileToDelete = await findFile(FILE_COPY_ENDING)
+    const fileToDelete = await findFile(FILE_COPY_ENDING, true)
     if (fileToDelete) {
       console.log(`Deleting old entry: ${fileToDelete}\n`)
       await FS.rm(`${BOOT_ENTRIES_PATH}/${fileToDelete}`)
@@ -44,9 +44,12 @@ async function deleteOldEntry() {
 /**
  * @param {String} ending 
  */
-async function findFile(ending) {
+async function findFile(ending, forDelete = false) {
   try {
     const files = await FS.readdir(BOOT_ENTRIES_PATH)
+    if (forDelete) {
+      return files.find((f) => f.endsWith(ending))
+    }
     return files.find((f) => f.endsWith(ending) && f.includes('arch') && !f.includes('fallback') && !f.includes('performance'))
   } catch (err) {
     logAndDie(err)
