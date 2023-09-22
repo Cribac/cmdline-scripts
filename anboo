@@ -5,7 +5,7 @@
  * and writing a new entry with the optimus-manager startup option set to nvidia.
  * 
  * @author https://github.com/cribac
- * @version 0.4.0
+ * @version 0.4.1
  */
 const FS = require('fs/promises')
 
@@ -101,7 +101,7 @@ function fileCopyName() {
  * @returns {Array<String>}
  */
 function getSanitizedLines(lines) {
-  const filteredLines = lines.filter(Boolean)
+  const filteredLines = lines.filter((line) => !line.startsWith('#')).filter(Boolean)
   const sanitizedLines = []
   filteredLines.forEach((line, idx) => {
     if (line.includes(KEYS[idx])) {
