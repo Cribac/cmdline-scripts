@@ -1,0 +1,13 @@
+/home/*/.cache/*
+.cache
+.cargo
+.docker
+.nvm
+.npm
+.mozilla
+node_modules
+node_modules*
+.pnpm
+pnpm*
+.local/share/icons*
+
