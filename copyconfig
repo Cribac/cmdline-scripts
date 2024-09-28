@@ -7,6 +7,7 @@ target=$HOME/Projects/dotfiles/.config
 
 rsync -aP \
   --exclude ".idea" \
+  --exclude ".git" \
   --exclude "ranger_devicons" \
   $config/i3 \
   $config/dunst \
@@ -18,5 +19,6 @@ rsync -aP \
   $config/starship.toml \
   $config/polybar \
   $config/neofetch \
+  $config/tmux\
   $target
 
