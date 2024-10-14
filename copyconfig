@@ -20,5 +20,6 @@ rsync -aP \
   $config/polybar \
   $config/neofetch \
   $config/tmux\
+  $config/joshuto\
   $target
 
