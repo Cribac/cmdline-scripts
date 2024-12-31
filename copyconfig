@@ -21,5 +21,6 @@ rsync -aP \
   $config/neofetch \
   $config/tmux\
   $config/joshuto\
+  $config/ghostty\
   $target
 
